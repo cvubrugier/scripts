@@ -1,0 +1,81 @@
+#!/usr/bin/awk -f
+#
+# (C) Copyright 2015
+# Christophe Vu-Brugier <cvubrugier@fastmail.fm>
+#
+# SPDX-License-Identifier:     MIT
+#
+# Compute the mean and the relative standard deviation of several
+# bonnie++ tests.
+# The Welford's method is used to compute the mean and the standard
+# deviation because it is more accurate and computes a running
+# variance.
+# See http://www.johndcook.com/standard_deviation.html
+#
+# Usage: bonnie-parse BONNIE_LOG
+#
+
+BEGIN {
+	FS = ","
+	HAS_HEADER = 0
+
+	MW = 0.0
+	SW = 0.0
+	MINW = 2^32
+	MAXW = -1
+
+	ME = 0.0
+	SE = 0.0
+	MINE = 2^32
+	MAXE = -1
+
+	MR = 0.0
+	SR = 0.0
+	MINR = 2^32
+	MAXR = -1
+}
+
+{
+	if ($1 == "name" && $2 == "file_size") {
+		HAS_HEADER = 1
+		exit 1
+	}
+
+	W = $5  # Write
+	E = $7  # rEwrite
+	R = $11 # Read
+
+	old_MW = MW
+	MW += (W - old_MW) / NR
+	SW += (W - old_MW) * (W - MW)
+	MINW = (W < MINW) ? W : MINW
+	MAXW = (W > MAXW) ? W : MAXW
+
+	old_ME = ME
+	ME += (E - old_ME) / NR
+	SE += (E - old_ME) * (E - ME)
+	MINE = (E < MINE) ? E : MINE
+	MAXE = (E > MAXE) ? E : MAXE
+
+	old_MR = MR
+	MR += (R - old_MR) / NR
+	SR += (R - old_MR) * (R - MR)
+	MINR = (R < MINR) ? R : MINR
+	MAXR = (R > MAXR) ? R : MAXR
+}
+
+END {
+	if (HAS_HEADER) {
+		print "ERROR: please remove the bonnie++ header from your input file." > "/dev/stderr"
+		exit 1
+	}
+
+	printf "W  %6d +/- %.1f %%  (min = %6d, max = %6d)\n",
+		int(MW), (NR > 1) ? 100 * sqrt(SW / (NR - 1)) / MW : 0, MINW, MAXW
+
+	printf "RW %6d +/- %.1f %%  (min = %6d, max = %6d)\n",
+		int(ME), (NR > 1) ? 100 * sqrt(SE / (NR - 1)) / ME : 0, MINE, MAXE
+
+	printf "R  %6d +/- %.1f %%  (min = %6d, max = %6d)\n",
+		int(MR), (NR > 1) ? 100 * sqrt(SR / (NR - 1)) / MR : 0, MINR, MAXR
+}
