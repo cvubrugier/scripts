@@ -1,0 +1,22 @@
+#!/usr/bin/python
+#
+# Usage: difftime "YEAR-MONTH-DAY H:M:S" "YEAR-MONTH-DAY H:M:S"
+#
+
+import datetime
+import re
+import sys
+
+
+def str2datetime(s):
+    year, month, day, h, m, s = [int(v) for v in re.split('\W+', s)]
+    return datetime.datetime(year, month, day, h, m, s)
+
+
+def difftime(start, end):
+    return str2datetime(end) - str2datetime(start)
+
+
+if __name__ == '__main__':
+    delta = difftime(sys.argv[1], sys.argv[2])
+    print '%s -> %d seconds' % (delta, delta.total_seconds())
