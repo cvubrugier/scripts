@@ -1,0 +1,31 @@
+#!/usr/bin/python
+
+from __future__ import print_function
+import os.path
+import sys
+
+
+def usage():
+    print('Usage: {} HEX PERCENT\n\n'
+          'Darken the HEX color by the given percentage.\n'
+          'Specify a negative percentage to lighten the color.'
+          .format(os.path.basename(sys.argv[0])))
+
+
+def darken(rgb, percentage):
+    values = [int(v, 16) for v in rgb[0:2], rgb[2:4], rgb[4:6]]
+    return ''.join(['{:02X}'.format(int(v * (100.0 - percentage) / 100)) for v in values])
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        usage()
+        sys.exit(1)
+
+    rgb = sys.argv[1]
+    if len(rgb) != 6:
+        print("ERROR: The HEX color code must contain 6 characters.")
+        sys.exit(1)
+    percentage = int(sys.argv[2])
+
+    print(darken(rgb, percentage))
