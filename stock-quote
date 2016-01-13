@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+#
+# Usage: stock-quote FOO
+# retrieve the given stock quote from Google
+# www.google.com/finance/info?infotype=infoquoteall&q=FOO
+#
+
+import json
+import requests
+import sys
+
+
+def print_google_quote(stock):
+    params = {'infotype': 'infoquoteall', 'q': stock}
+    r = requests.get('http://www.google.com/finance/info', params=params)
+    # Google returns an invalid JSON string: the first two lines must be removed
+    data = json.loads(r.text[3:])
+    print('{}: {} ({}%)'.format(stock, data[0]['l'], data[0]['cp']))
+
+
+if __name__ == '__main__':
+    print_google_quote(sys.argv[1])
