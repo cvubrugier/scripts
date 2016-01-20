@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Usage: stock-quote FOO
+# Usage: stock-quote FOO [BAR]
 # retrieve the given stock quote from Google
 # www.google.com/finance/info?infotype=infoquoteall&q=FOO
 #
@@ -19,4 +19,5 @@ def print_google_quote(stock):
 
 
 if __name__ == '__main__':
-    print_google_quote(sys.argv[1])
+    for stock in sys.argv[1:]:
+        print_google_quote(stock)
