@@ -1,0 +1,39 @@
+#!/usr/bin/python
+#
+# Usage: lindy-set-power HOST PORT [on|off]
+# Power on or off the given PORT of a Lindy IPower Control 8 switch
+#
+
+from __future__ import print_function
+import requests
+import sys
+
+
+def usage():
+    print('Usage: lindy-set-power HOST PORT [on|off]')
+
+
+def lindy_set_power(host, port, enable=True):
+    url = 'http://{host}/statusjsn.js'.format(host=host)
+    params = {'components': 50947, 'cmd': 1, 'p': port, 's': int(enable)}
+    r = requests.get(url, params=params)
+    return r.status_code == 200
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        usage()
+        sys.exit(1)
+
+    host = sys.argv[1]
+    port = sys.argv[2]
+    on_off = sys.argv[3]
+    if not port.isdigit() or on_off not in ['on', 'off']:
+        usage()
+        sys.exit(1)
+
+    port = int(port)
+    enable = {'on': True, 'off': False}[on_off]
+
+    ok = lindy_set_power(host, port, enable)
+    sys.exit(not ok)
