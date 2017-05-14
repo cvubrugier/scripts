@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Usage: lindy-set-power HOST PORT [on|off]
 # Power on or off the given PORT of a Lindy IPower Control 8 switch

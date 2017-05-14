@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Usage: difftime "YEAR-MONTH-DAY H:M:S" "YEAR-MONTH-DAY H:M:S"
 #
 
+from __future__ import print_function
 import datetime
 import re
 import sys
@@ -19,4 +20,4 @@ def difftime(start, end):
 
 if __name__ == '__main__':
     delta = difftime(sys.argv[1], sys.argv[2])
-    print '%s -> %d seconds' % (delta, delta.total_seconds())
+    print('{} -> {} seconds'.format(delta, delta.total_seconds()))
