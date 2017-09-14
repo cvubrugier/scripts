@@ -2,21 +2,40 @@
 #
 # Usage: stock-quote FOO [BAR]
 # retrieve the given stock quote from Google
-# www.google.com/finance/info?infotype=infoquoteall&q=FOO
+# https://finance.google.com/finance/getprices?q=FOO&p=2d&i=60
 #
 
 from __future__ import print_function
-import json
+import re
 import requests
 import sys
 
 
 def print_google_quote(stock):
-    params = {'infotype': 'infoquoteall', 'q': stock}
-    r = requests.get('http://www.google.com/finance/info', params=params)
-    # Google returns an invalid JSON string: the first two lines must be removed
-    data = json.loads(r.text[3:])
-    print('{}: {} ({}%)'.format(stock, data[0]['l'], data[0]['cp']))
+    params = {
+        'q': stock,
+        'p': '2d', # Period: 2 days
+        'i': '60', # Interval: 60 seconds
+    }
+    r = requests.get('https://finance.google.com/finance/getprices', params=params)
+    lines = r.text.split()
+
+    # Get the previous close.
+    # We match the openings that are identified by a Unix timestamp
+    # preceded by a 'a' character and read the last tick before the
+    # last opening.
+    openings = [(idx, line) for (idx, line) in enumerate(lines) if re.match('a\d+,.*', line)]
+    assert len(openings) == 2
+    idx = int(openings[-1][0]) - 1
+    previous = float(lines[idx].split(',')[1])
+
+    # Get the latest tick (the last line)
+    current = float(lines[-1].split(',')[1])
+
+    delta = current - previous
+    delta_percent = delta / previous * 100
+
+    print('{}: {} ({:+.2f}, {:+.2f}%)'.format(stock, current, delta, delta_percent))
 
 
 if __name__ == '__main__':
