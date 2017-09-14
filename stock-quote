@@ -25,6 +25,9 @@ def print_google_quote(stock):
     # preceded by a 'a' character and read the last tick before the
     # last opening.
     openings = [(idx, line) for (idx, line) in enumerate(lines) if re.match('a\d+,.*', line)]
+    if not openings:
+        print('{}: no data'.format(stock))
+        return
     assert len(openings) == 2
     idx = int(openings[-1][0]) - 1
     previous = float(lines[idx].split(',')[1])
